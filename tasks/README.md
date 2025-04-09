@@ -38,9 +38,11 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 
 Project title and a brief description
 Setup instructions (how to run the frontend and backend).
+API endpoints documentation: document each endpoint with its method, URL, request body (if any), and response format (success and error).
 Environment variable configuration
 Database setup information (PostgreSQL and the required schema, SQL script).
 API endpoint documentation (as above).
 Testing instructions (how to run unit tests).
-Brief explanation of architectural choices (Next.js, TypeScript, Tailwind).
-Mention any security considerations implemented (e.g., environment variables, input validation).
+Brief explanation of architectural choices (Next.js, TypeScript, Tailwind) and separation of concerns in backend and component based approach in frontend.
+Mention any security considerations implemented (e.g., environment variables, input validation), web security
+
