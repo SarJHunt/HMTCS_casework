@@ -1,37 +1,47 @@
-
-import { NextApiRequest, NextApiResponse } from 'next';
-import { Pool } from 'pg';
+import { NextApiRequest, NextApiResponse } from "next";
+import { Pool } from "pg";
 
 const pool = new Pool({
-    host: process.env.POSTGRES_HOST,
-    port: parseInt(process.env.POSTGRES_PORT || '5432'),
-    database: process.env.POSTGRES_DB,
-    user: process.env.POSTGRES_USER,
-    password: process.env.POSTGRES_PASSWORD, // Fallback to an empty string
-    max: 10,
-    idleTimeoutMillis: 30000,
-  });
-
-  console.log('POSTGRES_PASSWORD:', process.env.POSTGRES_PASSWORD);
-  
-  if (!process.env.POSTGRES_PASSWORD) {
-    console.error('POSTGRES_PASSWORD is not set in the environment variables.');
-  }
+  host: process.env.POSTGRES_HOST,
+  port: parseInt(process.env.POSTGRES_PORT || "5432"),
+  database: process.env.POSTGRES_DB,
+  user: process.env.POSTGRES_USER,
+  password: process.env.POSTGRES_PASSWORD,
+});
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const client = await pool.connect();
-  try {
-    // Your database interaction logic here using 'client.query()'
-    const result = await client.query('SELECT NOW()');
-    res.status(200).json({ message: 'Connected to PostgreSQL!', time: result.rows[0].now });
-  } catch (error) {
-    console.error('Error connecting to PostgreSQL:', error);
-    res.status(500).json({ message: 'Failed to connect to PostgreSQL', error: (error as Error).message });
-  }
-   finally {
-    client.release(); // Release the client back to the pool
+  if (req.method === "GET") {
+    try {
+      const result = await pool.query("SELECT id, title, description, status, TO_CHAR(due_date, 'YYYY-MM-DD') as due_date FROM tasks");
+      console.log("Tasks fetched:", result.rows);
+      res.status(200).json(result.rows);
+    } catch (error) {
+      console.error("Error fetching tasks:", error);
+      res.status(500).json({ error: "Failed to fetch tasks" });
+    }
+  } else if (req.method === "POST") {
+    // Your POST request logic remains the same
+    try {
+      const { title, status, dueDate } = req.body;
+
+      if (!title || !status) {
+        res.status(400).json({ error: "Title and status are required" });
+        return;
+      }
+
+      const result = await pool.query(
+        "INSERT INTO tasks (title, status, due_date) VALUES ($1, $2, $3) RETURNING *",
+        [title, status, dueDate || null]
+      );
+
+      console.log("Task created:", result.rows[0]);
+      res.status(201).json(result.rows[0]);
+    } catch (error) {
+      console.error("Error creating task:", error);
+      res.status(500).json({ error: "Failed to create task" });
+    }
+  } else {
+    res.setHeader("Allow", ["GET", "POST"]);
+    res.status(405).end(`Method ${req.method} Not Allowed`);
   }
 }
-
-
-

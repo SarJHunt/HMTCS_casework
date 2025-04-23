@@ -11,7 +11,7 @@ export default function Header() {
             />
           </div>
         </div>
-        <div className="flex items-center justify-center font-bold text-4xl text-blue-600">
+        <div className="flex items-center justify-center font-bold text-4xl text-[var(--color-secondary)]">
           TaskFlow
         </div>
       </div>
