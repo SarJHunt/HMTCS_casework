@@ -15,45 +15,53 @@ export default async function idHandler(req: NextApiRequest, res: NextApiRespons
 
   if (req.method === "GET") {
     try {
-      const result = await pool.query("SELECT id, title, description, status, TO_CHAR(due_date, 'YYYY-MM-DD') as due_date FROM tasks WHERE id = $1", [id]);
+      const result = await pool.query(
+        "SELECT id, title, description, status, TO_CHAR(due_date, 'YYYY-MM-DD') as due_date FROM tasks WHERE id = $1",
+        [id]
+      );
 
       if (result.rows.length === 0) {
-        res.status(404).json({ error: "Task not found" });
-        return;
+        return res.status(404).json({ error: "Task not found" });
       }
 
-      res.status(200).json(result.rows[0]);
+      return res.status(200).json(result.rows[0]);
     } catch (error) {
       console.error("Error fetching task by ID: ", error);
-      res.status(500).json({ error: "Failed to fetch task" });
+      return res.status(500).json({ error: "Failed to fetch task" });
     }
-  } else if (req.method === "DELETE") {
+  }
+
+  if (req.method === "DELETE") {
     try {
       const result = await pool.query("DELETE FROM tasks WHERE id = $1", [id]);
 
       if (result.rowCount === 0) {
-        res.status(404).json({ error: "Task not found" });
-        return;
+        return res.status(404).json({ error: "Task not found" });
       }
 
-      res.status(200).json({ message: "Task deleted successfully" });
+      return res.status(200).json({ message: "Task deleted successfully" });
     } catch (error) {
       console.error("Error deleting task by ID: ", error);
-      res.status(500).json({ error: "Failed to delete task" });
+      return res.status(500).json({ error: "Failed to delete task" });
     }
-  } else if (req.method === "PATCH") {
-    const errors = validateTaskInput(req.body, false);
-if (errors.length > 0) {
-  return res.status(400).json({ errors });
-}
+  }
+
+  if (req.method === "PATCH") {
+    const errors: string[] = validateTaskInput(req.body, true);
+
+    if (errors.length > 0) {
+      return res.status(400).json({ errors });
+    }
+
     try {
       const { status, dueDate, description } = req.body;
 
       console.log("Received updates:", { status, dueDate, description });
 
       if (!status && !dueDate && !description) {
-        res.status(400).json({ error: "At least one field (status, dueDate, description) is required" });
-        return;
+        return res.status(400).json({
+          error: "At least one field (status, dueDate, description) is required"
+        });
       }
 
       const updates = [];
@@ -61,22 +69,24 @@ if (errors.length > 0) {
       let query = "UPDATE tasks SET ";
 
       if (status) {
-        updates.push("status = $1");
+        updates.push(`status = $${values.length + 1}`);
         values.push(status);
       }
+
       if (dueDate) {
-        const localDate = new Date(dueDate); 
-        const utcDateString = localDate.toISOString(); // Convert to UTC string
-        updates.push("due_date = $" + (values.length + 1));
+        const localDate = new Date(dueDate);
+        const utcDateString = localDate.toISOString();
+        updates.push(`due_date = $${values.length + 1}`);
         values.push(utcDateString);
       }
+
       if (description) {
-        updates.push("description = $" + (values.length + 1));
+        updates.push(`description = $${values.length + 1}`);
         values.push(description);
       }
 
-      query += updates.join(", ") + " WHERE id = $" + (values.length + 1) + " RETURNING *";
-      values.push(req.query.id);
+      query += updates.join(", ") + ` WHERE id = $${values.length + 1} RETURNING *`;
+      values.push(id);
 
       console.log("Executing query:", query);
       console.log("With values:", values);
@@ -84,15 +94,16 @@ if (errors.length > 0) {
       const result = await pool.query(query, values);
 
       if (result.rowCount === 0) {
-        console.error("No rows updated. Query:", query, "Values:", values);
-        res.status(404).json({ error: "Task not found or no changes made" });
-        return;
+        return res.status(404).json({ error: "Task not found or no changes made" });
       }
 
-      res.status(200).json(result.rows[0]);
+      return res.status(200).json(result.rows[0]);
     } catch (error) {
       console.error("Error updating task:", error);
-      res.status(500).json({ error: "Failed to update task" });
+      return res.status(500).json({ error: "Failed to update task" });
     }
   }
+
+  res.setHeader("Allow", ["GET", "DELETE", "PATCH"]);
+  return res.status(405).end(`Method ${req.method} Not Allowed`);
 }
