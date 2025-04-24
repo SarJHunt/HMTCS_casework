@@ -5,8 +5,9 @@ import { format } from "date-fns-tz";
 import { parseISO } from "date-fns";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import React from "react";
 
-interface Task {
+export interface Task {
   id: number;
   title: string;
   description: string;
@@ -60,14 +61,18 @@ const TaskList = () => {
         if (!response.ok) throw new Error("Failed to fetch tasks");
         const data = await response.json();
 
-        const normalizedData = data.map((task: any) => ({
+        const normalizedData = data.map((task: Task) => ({
           ...task,
           dueDate: task.due_date || task.dueDate,
         }));
 
         setTasks(normalizedData);
-      } catch (err: any) {
-        toast.error(err.message || "Failed to load tasks.");
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+          toast.error(err.message || "Failed to load tasks.");
+        } else {
+          toast.error("Failed to load tasks.");
+        }
       } finally {
         setLoading(false);
       }
@@ -101,9 +106,13 @@ const TaskList = () => {
       setTasks((prevTasks) => [...prevTasks, normalizedTask]);
       setNewTask({ title: "", description: "", status: "Open", dueDate: "" });
       toast.success("Task created successfully!");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error creating task:", err);
-      toast.error(`Failed to create task: ${err.message}`);
+      if (err instanceof Error) {
+        toast.error(`Failed to create task: ${err.message}`);
+      } else {
+        toast.error("Failed to create task.");
+      }
     }
   };
 
@@ -133,9 +142,13 @@ const TaskList = () => {
       );
       setEditedTask(null);
       toast.success("Task updated successfully!");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error updating task:", err);
-      toast.error(`Failed to update task: ${err.message}`);
+      if (err instanceof Error) {
+        toast.error(`Failed to update task: ${err.message}`);
+      } else {
+        toast.error("Failed to update task.");
+      }
     }
   };
 
@@ -146,9 +159,13 @@ const TaskList = () => {
 
       setTasks((prevTasks) => prevTasks.filter((task) => task.id !== id));
       toast.success("Task deleted successfully!");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error deleting task:", err);
-      toast.error(`Failed to delete task: ${err.message}`);
+      if (err instanceof Error) {
+        toast.error(`Failed to delete task: ${err.message}`);
+      } else {
+        toast.error("Failed to delete task.");
+      }
     }
   };
 
@@ -164,9 +181,8 @@ const TaskList = () => {
   if (loading) return <p>Loading tasks...</p>;
 
   return (
-    <div>
-  
-     {/* Add a Task Form */}
+    <div className="container mx-auto px-4 py-6">
+      {/* Add a Task Form */}
       <div className="mb-4">
         <h3 className="font-bold mb-2">Create a new task</h3>
         <input
@@ -205,9 +221,11 @@ const TaskList = () => {
           Add task
         </button>
       </div>
-
+  
       {/* List of Tasks */}
-      <h3 className="font-semibold mb-4">All tasks</h3>
+      {tasks.length > 0 && (
+        <h3 className="font-semibold mb-4">All tasks</h3>
+      )}
       {tasks.map((task) => (
         <div key={task.id} className="border p-4 mb-2 rounded">
           <h3 className="font-bold">{task.title}</h3>
@@ -265,6 +283,9 @@ const TaskList = () => {
           </div>
         </div>
       ))}
+      {tasks.length === 0 && !loading && (
+        <p>No tasks available</p>
+      )}
     </div>
   );
 };
