@@ -27,7 +27,6 @@ export default async function idHandler(req: NextApiRequest, res: NextApiRespons
       res.status(500).json({ error: "Failed to fetch task" });
     }
   } else if (req.method === "DELETE") {
-    // Your DELETE request logic remains the same
     try {
       const result = await pool.query("DELETE FROM tasks WHERE id = $1", [id]);
 
@@ -61,7 +60,7 @@ export default async function idHandler(req: NextApiRequest, res: NextApiRespons
         values.push(status);
       }
       if (dueDate) {
-        const localDate = new Date(dueDate); // Treat the incoming string as local
+        const localDate = new Date(dueDate); 
         const utcDateString = localDate.toISOString(); // Convert to UTC string
         updates.push("due_date = $" + (values.length + 1));
         values.push(utcDateString);

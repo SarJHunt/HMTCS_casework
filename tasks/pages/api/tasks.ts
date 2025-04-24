@@ -20,7 +20,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       res.status(500).json({ error: "Failed to fetch tasks" });
     }
   } else if (req.method === "POST") {
-    // Your POST request logic remains the same
+
     try {
       const { title, status, dueDate } = req.body;
 

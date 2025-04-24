@@ -1,0 +1,113 @@
+{
+	"info": {
+	  "_postman_id": "f814c96a-3a93-47b1-b2e2-bd0442061a21",
+	  "name": "HMTCS_casework",
+	  "description": "This collection demonstrates the API endpoints set up for the HMTCS_casework app.",
+	  "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+	  "_exporter_id": "40367353"
+	},
+	"item": [
+	  {
+		"name": "all_tasks",
+		"request": {
+		  "method": "GET",
+		  "header": [],
+		  "url": {
+			"raw": "{{baseUrl}}/api/tasks"
+		  },
+		  "description": "The purpose of this request is to retrieve all tasks in the database."
+		},
+		"response": []
+	  },
+	  {
+		"name": "delete tasks by ID",
+		"request": {
+		  "method": "DELETE",
+		  "header": [],
+		  "url": {
+			"raw": "{{baseUrl}}/api/tasks/:id",
+			"host": [
+			  "{{baseUrl}}"
+			],
+			"path": [
+			  "api",
+			  "tasks",
+			  ":id"
+			]
+		  },
+		  "description": "The purpose of this request is to delete a task by ID."
+		},
+		"response": []
+	  },
+	  {
+		"name": "add_task",
+		"request": {
+		  "method": "POST",
+		  "header": [],
+		  "url": {
+			"raw": "{{baseUrl}}/api/tasks"
+		  },
+		  "body": {
+			"mode": "raw",
+			"raw": "{\n  \"title\": \"Review case #456\",\n  \"description\": \"Case notes here\",\n  \"status\": \"Open\",\n  \"dueDate\": \"2025-07-06\"\n}",
+			"options": {
+			  "raw": {
+				"language": "json"
+			  }
+			}
+		  },
+		  "description": "Add a new task by providing task details in JSON format."
+		},
+		"response": []
+	  },
+	  {
+		"name": "update_task",
+		"request": {
+		  "method": "PATCH",
+		  "header": [],
+		  "url": {
+			"raw": "{{baseUrl}}/api/tasks/:id",
+			"host": [
+			  "{{baseUrl}}"
+			],
+			"path": [
+			  "api",
+			  "tasks",
+			  ":id"
+			]
+		  },
+		  "body": {
+			"mode": "raw",
+			"raw": "{\n  \"status\": \"Completed\",\n  \"description\": \"Finalized the task\",\n  \"dueDate\": \"2025-08-01\"\n}",
+			"options": {
+			  "raw": {
+				"language": "json"
+			  }
+			}
+		  },
+		  "description": "Update a task using the task ID and new values."
+		},
+		"response": []
+	  },
+	  {
+		"name": "task_by_ID",
+		"request": {
+		  "method": "GET",
+		  "header": [],
+		  "url": {
+			"raw": "{{baseUrl}}/api/tasks/:id",
+			"host": [
+			  "{{baseUrl}}"
+			],
+			"path": [
+			  "api",
+			  "tasks",
+			  ":id"
+			]
+		  },
+		  "description": "Retrieve a specific task using its ID."
+		},
+		"response": []
+	  }
+	]
+  }
