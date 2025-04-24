@@ -1,6 +1,9 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { Pool } from "pg";
 
+import { validateTaskInput } from "../../utils/validateTask";
+
+
 const pool = new Pool({
   host: process.env.POSTGRES_HOST,
   port: parseInt(process.env.POSTGRES_PORT || "5432"),
@@ -20,7 +23,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       res.status(500).json({ error: "Failed to fetch tasks" });
     }
   } else if (req.method === "POST") {
-
+    const errors = validateTaskInput(req.body, false);
+if (errors.length > 0) {
+  return res.status(400).json({ errors });
+}
     try {
       const { title, status, dueDate } = req.body;
 

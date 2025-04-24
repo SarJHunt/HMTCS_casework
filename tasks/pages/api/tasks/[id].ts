@@ -1,5 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { Pool } from "pg";
+import { validateTaskInput } from "../../../utils/validateTask";
 
 const pool = new Pool({
   host: process.env.POSTGRES_HOST,
@@ -41,6 +42,10 @@ export default async function idHandler(req: NextApiRequest, res: NextApiRespons
       res.status(500).json({ error: "Failed to delete task" });
     }
   } else if (req.method === "PATCH") {
+    const errors = validateTaskInput(req.body, false);
+if (errors.length > 0) {
+  return res.status(400).json({ errors });
+}
     try {
       const { status, dueDate, description } = req.body;
 
